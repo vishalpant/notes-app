@@ -1,17 +1,10 @@
 const fs = require('fs')
 const chalk = require('chalk')
 
-const getNotes = function() {
-    return 'Your notes...'
-}
-
-const addNote = function(title, body) {
+const addNote = (title, body) => {
     const notes = loadNotes()
-    const duplicateNotes = notes.filter(function(note) {
-        return note.title === title
-    })
-
-    if(duplicateNotes.length === 0) {
+    const duplicateNote = notes.find((note) => note.title === title)
+    if(!duplicateNote) {
         notes.push({
             title: title,
             body: body
@@ -23,16 +16,39 @@ const addNote = function(title, body) {
     }
 }
 
-const removeNote = function(title) {
+const removeNote = (title) => {
     const notes = loadNotes()
-    const updatedNotes = notes.filter(function(note) {
-        return note.title !== title 
-    })
+    const updatedNotes = notes.filter((note) => note.title !== title)
     updatedNotes.length !== notes.length ? console.log(chalk.green(title, ' removed!')) : console.log(chalk.red('Title not found!'))
     saveNotes(updatedNotes)
 }
 
-const loadNotes = function() {
+const listNotes = () => {
+    const notes = loadNotes()
+    if(notes.length > 0) {
+        console.log(chalk.green('Your notes!'))
+        notes.forEach((note) => {
+            console.log(chalk.green(note.title))
+        })
+    }
+    else {
+        console.log(chalk.red('No notes available!'))
+    }
+}
+
+const readNote = (title) => {
+    const notes = loadNotes()
+    const noteRead = notes.find((note) => note.title === title)
+    if(noteRead) {
+        console.log(chalk.italic(noteRead.title))
+        console.log(noteRead.body)
+    }
+    else {
+        console.log(chalk.red('Note not found!'))
+    }
+}
+
+const loadNotes = () => {
     try {
         const dataBuffer = fs.readFileSync('notes.json')
         const dataJSON = dataBuffer.toString()
@@ -44,13 +60,14 @@ const loadNotes = function() {
     
 }
 
-const saveNotes = function(notes) {
+const saveNotes = (notes) => {
     const dataJSON = JSON.stringify(notes)
     fs.writeFileSync('notes.json', dataJSON)
 }
 
 module.exports = {
-    'getNotes': getNotes,
     'addNote': addNote,
-    'removeNote': removeNote
+    'removeNote': removeNote,
+    'listNotes': listNotes,
+    'readNote': readNote
 }
